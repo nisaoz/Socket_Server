@@ -1,0 +1,9 @@
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\bin\Debug\Socket_Server.exe.config
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\bin\Debug\Socket_Server.exe
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\bin\Debug\Socket_Server.pdb
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\obj\Debug\Socket_Server.csprojResolveAssemblyReference.cache
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\obj\Debug\Socket_Server.Main.resources
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\obj\Debug\Socket_Server.Properties.Resources.resources
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\obj\Debug\Socket_Server.csproj.GenerateResource.Cache
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\obj\Debug\Socket_Server.exe
+C:\Visual Studio 2015\Projects\Socket_Server\Socket_Server\obj\Debug\Socket_Server.pdb
