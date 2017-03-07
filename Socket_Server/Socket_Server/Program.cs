@@ -11,14 +11,18 @@ namespace Socket_Server
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        /// 
+        private static string[] args;
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             try
             {
-                Application.Run(new Main());
+                args = Environment.GetCommandLineArgs();
+                Application.Run(new Main(args));
             }
             catch (Exception ex)
             {

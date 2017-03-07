@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -12,18 +13,29 @@ namespace Socket_Server
         private readonly static string fileName = "RemoteConnection_Server.exe";
         private readonly static string path = Path.Combine(Environment.CurrentDirectory, fileName);
 
-        public static string PC_Name, client_port, denemePort = "11501";
+        public static List<Client> connectedClient_list = new List<Client>();
+
+        public static string PC_Name, client_port;
+
+        public static string[] arg;
 
         private static Socket socket = new Socket
             (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
         public static ContextMenuStrip contextMenu = new ContextMenuStrip();
 
-        public Main()
+        public Main(string[] args)
         {
             this.Visible = false;
             this.ShowInTaskbar = false;
 
             InitializeComponent();
+            arg = args;
+
+            if(arg != null)
+            {
+
+            }   
 
             this.WindowState = FormWindowState.Minimized;
             notifyIcon_server.Icon = Properties.Resources.Cool;
@@ -34,15 +46,22 @@ namespace Socket_Server
 
             try
             {
+                //ThreadPool;
+                //Thread.Sleep(2000);
                 Thread th = new Thread(new ThreadStart(SocketServer_11500.Start));
                 th.Start();
-                //SocketServer_11500.Start();
+                Thread.Sleep(2000);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message.ToString());
                 Application.Exit();
             }
+        }
+
+        private static void socketServer_Start(object o)
+        {
+            SocketServer_11500.Start();
         }
 
         private static void MenuStripSettings()
@@ -67,11 +86,35 @@ namespace Socket_Server
 
             if (item.Text == "Çıkış")
                 Environment.Exit(0);
-            if (item.Text == PC_Name)
+        }
+
+        //Add computer names to context menu
+        private static void subMenuItem_Clicked(object sender, EventArgs e)
+        {
+            var clickedMenuItem = sender as ToolStripMenuItem;
+            /////////////////////////////////////
+            if (PC_Name == clickedMenuItem.Text)
             {
                 SocketServer_11500.Send(socket);
                 Start_EkranPaylas(socket);
             }
+        }
+
+        //Parametre ile gelene client ip, name, mac adresini ayır
+        private static void parseParameter(string text)
+        {
+            char delimeter = ' ';
+
+            string[] clientInfo = text.Split(delimeter);
+
+            Client client = new Client();
+
+            client.Client_Port = clientInfo[0]; //client port
+            client.Client_IP = clientInfo[1]; //client ip al
+            client.Client_PCName = clientInfo[2]; //client pc name al
+            client.Client_MAC = clientInfo[3]; //client mac adresini al
+
+            connectedClient_list.Add(client);
         }
 
         //Server'dan girilen komut "ekran" ise ekran paylas calısır
@@ -80,11 +123,15 @@ namespace Socket_Server
             Process start_ServerRemote = new Process();
             try
             {
+                client_port = (Convert.ToInt32(client_port) + 1).ToString();
                 start_ServerRemote.StartInfo.FileName = path;
-                start_ServerRemote.StartInfo.Arguments = SocketServer_11500.server_IP + ':' + denemePort;
+                start_ServerRemote.StartInfo.Arguments = SocketServer_11500.server_IP + ':' + client_port;
                 start_ServerRemote.Start();
+
                 start_ServerRemote.WaitForExit();
-                socket.Dispose();
+                start_ServerRemote.Kill();
+                start_ServerRemote.Dispose();
+                listener.Dispose();
             }
             catch (Exception ex)
             {
@@ -96,24 +143,44 @@ namespace Socket_Server
             }
         }
 
-        public static void addItemsToStrip(string pcname, string port, Socket s)
+        public static void RemovePC()
         {
-            PC_Name = pcname;
-            client_port = port;
+            client_port = (Convert.ToInt32(client_port) - 1).ToString();
+
+            for (int i = 0 ; i < connectedClient_list.Count; i++)
+            {
+                if(connectedClient_list[i].Client_Port == client_port)
+                {
+                    (contextMenu.Items[0] as ToolStripMenuItem).DropDownItems.RemoveByKey(connectedClient_list[i].Client_PCName);
+                    connectedClient_list.RemoveAt(i);
+                }
+            }
+        }
+
+        public static void addItemsToStrip(Client client, Socket s)
+        {
+            connectedClient_list.Add(client);
+            PC_Name = client.Client_PCName;
+            client_port = client.Client_Port;
             socket = s;
-            ToolStripMenuItem PC = new ToolStripMenuItem();
-            (contextMenu.Items[0] as ToolStripMenuItem).DropDownItems.Add(PC_Name);
+            
+            (contextMenu.Items[0] as ToolStripMenuItem).DropDownItems.Add(client.Client_PCName, null, subMenuItem_Clicked);
         }
 
         public void notifyIcon_server_MouseClick(object sender, MouseEventArgs e)
         {
-            try
+            if(e.Button == MouseButtons.Right)
             {
-                contextMenu.Show(MousePosition);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message.ToString());
+                try
+                {
+                    contextMenu.Show(Cursor.Position);
+                    contextMenu.AutoClose = true;
+                }
+                catch (Exception ex)
+                {
+                    contextMenu.Visible = false;
+                    Console.WriteLine("Error: " + ex.Message.ToString());
+                }
             }
         }
     }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-struct Client
+public struct Client
 {
     private string client_MAC;
     private string client_PCName;
@@ -17,8 +17,8 @@ struct Client
 
     public string Client_MAC
     {
-        get{ return client_MAC; }
-        set{ client_MAC = value; }
+        get { return client_MAC; }
+        set { client_MAC = value; }
     }
     public string Client_PCName
     {
@@ -47,7 +47,7 @@ namespace Socket_Server
 
         public static byte[] buffer = new byte[1024];
 
-        //Client struct'ının elemanları burada tutulacak
+        //Client struct'ının elemanları burada tutulacak  
         public static List<Client> client_list = new List<Client>();
 
         private static Socket accepted = new Socket
@@ -152,9 +152,13 @@ namespace Socket_Server
                     for (int i = 0; i < client_list.Count; i++)
                     {
                         if (mac == client_list[i].Client_MAC)
-                            Main.addItemsToStrip(client_list[i].Client_PCName, client_list[i].Client_Port, listener);
+                        {
+                            Client client = new Client();
+                            client = client_list[i];
+                            //Main.addItemsToStrip(client_list[i].Client_PCName, client_list[i].Client_Port, listener);
+                            Main.addItemsToStrip(client, listener);
+                        }
                     }
-
                     Console.WriteLine(clientInfo);
                 }
                 catch (Exception ex)
@@ -164,6 +168,12 @@ namespace Socket_Server
                     listener.Dispose();
                     Environment.Exit(0);
                 }
+            }
+            else
+            {
+                listener.Dispose();
+                Main.RemovePC();
+                server_socket.BeginAccept(new AsyncCallback(AcceptCall), null);
             }
         }
 
@@ -181,6 +191,7 @@ namespace Socket_Server
             int bytesSent = listener.EndSend(AR);
             listener.Close();
             listener.Dispose();
+
         }
 
         //Client ip, name, mac adresini ayır
@@ -227,6 +238,5 @@ namespace Socket_Server
             }
             throw new Exception("Local IP Address Not Found!");
         }
-
     }
 }
